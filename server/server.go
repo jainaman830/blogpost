@@ -66,7 +66,6 @@ func (s *blogServer) DeletePost(ctx context.Context, request *blog.DeletePostReq
 }
 func (s *blogServer) ReadAllPosts(ctx context.Context, req *blog.ReadAllPost) (*blog.AllPosts, error) {
 	var allPosts []*blog.Post
-	fmt.Println("s.posts", s.posts)
 	for _, post := range s.posts {
 		allPosts = append(allPosts, post)
 	}
