@@ -17,13 +17,17 @@ message Post {
 service BlogPost {
     rpc CreatePost(Post) returns (Post);
     rpc ReadPost(ReadPostRequest) returns (Post);
+    rpc ReadAllPosts(ReadAllPost) returns (AllPosts);
     rpc UpdatePost(UpdatePostRequest) returns (Post);
     rpc DeletePost(DeletePostRequest) returns (DeletePostResponse);
 }
-
+message AllPosts {
+    repeated Post allpost=1;
+}
 message ReadPostRequest {
     string PostID = 1;
 }
+message ReadAllPost {}
 
 message UpdatePostRequest {
     string PostID  = 1;

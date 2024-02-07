@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 	"log"
 	"net"
@@ -11,6 +9,7 @@ import (
 
 	blog "project/blogpost/blog/blogs"
 
+	"github.com/google/uuid"
 	"google.golang.org/grpc"
 )
 
@@ -20,13 +19,8 @@ type blogServer struct {
 }
 
 func (s *blogServer) CreatePost(ctx context.Context, req *blog.Post) (*blog.Post, error) {
-	postID, err := GenerateRandomID(16)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return nil, err
-	}
 	post := &blog.Post{
-		PostID:           postID,
+		PostID:           uuid.New().String(),
 		Title:            req.Title,
 		Content:          req.Content,
 		Author:           req.Author,
@@ -35,7 +29,7 @@ func (s *blogServer) CreatePost(ctx context.Context, req *blog.Post) (*blog.Post
 		Tags:             req.Tags,
 	}
 
-	s.posts[postID] = post
+	s.posts[post.PostID] = post
 	return post, nil
 }
 
@@ -70,18 +64,16 @@ func (s *blogServer) DeletePost(ctx context.Context, request *blog.DeletePostReq
 	return &blog.DeletePostResponse{Success: true, Message: "Post deleted successfully"}, nil
 
 }
-func GenerateRandomID(length int) (string, error) {
-	if length%2 != 0 {
-		return "", fmt.Errorf("length must be even")
+func (s *blogServer) ReadAllPosts(ctx context.Context, req *blog.ReadAllPost) (*blog.AllPosts, error) {
+	var allPosts []*blog.Post
+	fmt.Println("s.posts", s.posts)
+	for _, post := range s.posts {
+		allPosts = append(allPosts, post)
 	}
-
-	randomBytes := make([]byte, length/2)
-	_, err := rand.Read(randomBytes)
-	if err != nil {
-		return "", err
+	output := &blog.AllPosts{
+		Allpost: allPosts,
 	}
-
-	return hex.EncodeToString(randomBytes), nil
+	return output, nil
 }
 func main() {
 	listener, err := net.Listen("tcp", ":8080")

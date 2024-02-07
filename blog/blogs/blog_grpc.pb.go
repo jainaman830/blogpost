@@ -19,10 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	BlogPost_CreatePost_FullMethodName = "/blog.BlogPost/CreatePost"
-	BlogPost_ReadPost_FullMethodName   = "/blog.BlogPost/ReadPost"
-	BlogPost_UpdatePost_FullMethodName = "/blog.BlogPost/UpdatePost"
-	BlogPost_DeletePost_FullMethodName = "/blog.BlogPost/DeletePost"
+	BlogPost_CreatePost_FullMethodName   = "/blog.BlogPost/CreatePost"
+	BlogPost_ReadPost_FullMethodName     = "/blog.BlogPost/ReadPost"
+	BlogPost_ReadAllPosts_FullMethodName = "/blog.BlogPost/ReadAllPosts"
+	BlogPost_UpdatePost_FullMethodName   = "/blog.BlogPost/UpdatePost"
+	BlogPost_DeletePost_FullMethodName   = "/blog.BlogPost/DeletePost"
 )
 
 // BlogPostClient is the client API for BlogPost service.
@@ -31,6 +32,7 @@ const (
 type BlogPostClient interface {
 	CreatePost(ctx context.Context, in *Post, opts ...grpc.CallOption) (*Post, error)
 	ReadPost(ctx context.Context, in *ReadPostRequest, opts ...grpc.CallOption) (*Post, error)
+	ReadAllPosts(ctx context.Context, in *ReadAllPost, opts ...grpc.CallOption) (*AllPosts, error)
 	UpdatePost(ctx context.Context, in *UpdatePostRequest, opts ...grpc.CallOption) (*Post, error)
 	DeletePost(ctx context.Context, in *DeletePostRequest, opts ...grpc.CallOption) (*DeletePostResponse, error)
 }
@@ -61,6 +63,15 @@ func (c *blogPostClient) ReadPost(ctx context.Context, in *ReadPostRequest, opts
 	return out, nil
 }
 
+func (c *blogPostClient) ReadAllPosts(ctx context.Context, in *ReadAllPost, opts ...grpc.CallOption) (*AllPosts, error) {
+	out := new(AllPosts)
+	err := c.cc.Invoke(ctx, BlogPost_ReadAllPosts_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *blogPostClient) UpdatePost(ctx context.Context, in *UpdatePostRequest, opts ...grpc.CallOption) (*Post, error) {
 	out := new(Post)
 	err := c.cc.Invoke(ctx, BlogPost_UpdatePost_FullMethodName, in, out, opts...)
@@ -85,6 +96,7 @@ func (c *blogPostClient) DeletePost(ctx context.Context, in *DeletePostRequest, 
 type BlogPostServer interface {
 	CreatePost(context.Context, *Post) (*Post, error)
 	ReadPost(context.Context, *ReadPostRequest) (*Post, error)
+	ReadAllPosts(context.Context, *ReadAllPost) (*AllPosts, error)
 	UpdatePost(context.Context, *UpdatePostRequest) (*Post, error)
 	DeletePost(context.Context, *DeletePostRequest) (*DeletePostResponse, error)
 	mustEmbedUnimplementedBlogPostServer()
@@ -99,6 +111,9 @@ func (UnimplementedBlogPostServer) CreatePost(context.Context, *Post) (*Post, er
 }
 func (UnimplementedBlogPostServer) ReadPost(context.Context, *ReadPostRequest) (*Post, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadPost not implemented")
+}
+func (UnimplementedBlogPostServer) ReadAllPosts(context.Context, *ReadAllPost) (*AllPosts, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadAllPosts not implemented")
 }
 func (UnimplementedBlogPostServer) UpdatePost(context.Context, *UpdatePostRequest) (*Post, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePost not implemented")
@@ -155,6 +170,24 @@ func _BlogPost_ReadPost_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BlogPost_ReadAllPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadAllPost)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BlogPostServer).ReadAllPosts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BlogPost_ReadAllPosts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BlogPostServer).ReadAllPosts(ctx, req.(*ReadAllPost))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _BlogPost_UpdatePost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdatePostRequest)
 	if err := dec(in); err != nil {
@@ -205,6 +238,10 @@ var BlogPost_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReadPost",
 			Handler:    _BlogPost_ReadPost_Handler,
+		},
+		{
+			MethodName: "ReadAllPosts",
+			Handler:    _BlogPost_ReadAllPosts_Handler,
 		},
 		{
 			MethodName: "UpdatePost",
